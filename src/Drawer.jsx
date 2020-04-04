@@ -26,7 +26,7 @@ class Drawer extends PureComponent {
     super(props);
     this.state = {
       data: [],
-      selectedCountry: 'Sri Lanka',
+      selectedCountry: 'Turkey',
       loading: true,
       countries: [],
       dateIntervals: dates.map((date) => ({ label: date, value: date })),
@@ -40,11 +40,15 @@ class Drawer extends PureComponent {
 
   componentDidMount() {
     this.getData();
-    fetch('http://ip-api.com/json')
-      .then((response) => response.json())
+    fetch('https://geolocation-db.com/json')
+      .then((response) => {
+        console.log(response);
+        response.json();
+      })
       .then((data) => {
+        console.log(data);
         this.setState({
-          selectedCountry: data.country,
+          selectedCountry: data.country_name,
         });
       });
   }
