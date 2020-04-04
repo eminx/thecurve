@@ -39,14 +39,13 @@ class Drawer extends PureComponent {
   }
 
   componentDidMount() {
-    this.getData();
+    this.getCountryByIP();
+    // this.getData();
   }
 
   getCountryByIP = () => {
     fetch('https://ipapi.co/json')
-      .then((response) => {
-        return response.json();
-      })
+      .then((response) => response.json())
       .then((data) => {
         this.setState(
           {
@@ -70,6 +69,7 @@ class Drawer extends PureComponent {
         if (!data || !data[selectedCountry]) {
           return null;
         }
+
         const newData = data[selectedCountry]
           .filter((info, index) => {
             if (daysCount === 0) {
@@ -91,7 +91,7 @@ class Drawer extends PureComponent {
           data: newData,
           countries: countries.map((country) => ({
             label: country === 'US' ? 'United States' : country,
-            value: country === 'US' ? 'United States' : country,
+            value: country,
           })),
           loading: false,
         });
