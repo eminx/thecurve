@@ -40,29 +40,21 @@ class Drawer extends PureComponent {
 
   componentDidMount() {
     this.getData();
+  }
+
+  getCountryByIP = () => {
     fetch('https://ipapi.co/json')
       .then((response) => {
         return response.json();
       })
       .then((data) => {
-        this.setState({
-          selectedCountry: data.country_name,
-        });
+        this.setState(
+          {
+            selectedCountry: data.country_name,
+          },
+          () => this.getData()
+        );
       });
-  }
-
-  getDaysCount = () => {
-    const { selectedDateInterval } = this.state;
-    switch (selectedDateInterval) {
-      case dates[0]:
-        return 30;
-      case dates[1]:
-        return 7;
-      case dates[2]:
-        return 0;
-      default:
-        return 30;
-    }
   };
 
   getData = () => {
@@ -75,7 +67,7 @@ class Drawer extends PureComponent {
     fetch(apiEndpoint)
       .then((response) => response.json())
       .then((data) => {
-        if (!data) {
+        if (!data || !data[selectedCountry]) {
           return null;
         }
         const newData = data[selectedCountry]
@@ -98,12 +90,26 @@ class Drawer extends PureComponent {
         this.setState({
           data: newData,
           countries: countries.map((country) => ({
-            label: country,
-            value: country,
+            label: country === 'US' ? 'United States' : country,
+            value: country === 'US' ? 'United States' : country,
           })),
           loading: false,
         });
       });
+  };
+
+  getDaysCount = () => {
+    const { selectedDateInterval } = this.state;
+    switch (selectedDateInterval) {
+      case dates[0]:
+        return 30;
+      case dates[1]:
+        return 7;
+      case dates[2]:
+        return 0;
+      default:
+        return 30;
+    }
   };
 
   handleCountrySelect = (country) => {
