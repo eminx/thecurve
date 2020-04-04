@@ -40,13 +40,11 @@ class Drawer extends PureComponent {
 
   componentDidMount() {
     this.getData();
-    fetch('https://geolocation-db.com/json')
+    fetch('https://ipapi.co/json')
       .then((response) => {
-        console.log(response);
-        response.json();
+        return response.json();
       })
       .then((data) => {
-        console.log(data);
         this.setState({
           selectedCountry: data.country_name,
         });
