@@ -26,7 +26,7 @@ class Drawer extends PureComponent {
     super(props);
     this.state = {
       data: [],
-      selectedCountry: 'Turkey',
+      selectedCountry: 'Norway',
       loading: true,
       countries: [],
       dateIntervals: dates.map((date) => ({ label: date, value: date })),
