@@ -17,7 +17,9 @@ function App() {
         </Heading>
         <Subtitle isSize={6} style={{ marginBottom: 0 }}>
           live data per country: related to Covid-19 diagnosis, recovery and
-          death <br />
+          death
+          <br />
+          updated thrice a day
         </Subtitle>
         <Drawer />
         <Container style={{ padding: 48, lineHeight: 2, maxWidth: 720 }}>
