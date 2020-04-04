@@ -171,7 +171,7 @@ class Drawer extends PureComponent {
               <Column isSize={{ mobile: 12, isDesktop: 4 }}>
                 <Subtitle isSize={5} hasTextAlign="right">
                   <em>
-                    Numbers indicate total instances <b>by</b> date, not per
+                    Numbers indicate total instances <b>by date</b>, not per
                     date.
                   </em>
                 </Subtitle>
@@ -232,14 +232,10 @@ class Drawer extends PureComponent {
           </Box>
 
           <Box style={{ padding: 24 }}>
-            <Title isSize={4}>
-              Numbers in detail for {selectedCountry}{' '}
-              {selectedDateInterval === dateIntervals[2] ? '' : 'in'}{' '}
-              {selectedDateInterval}
-            </Title>
+            <Title isSize={4}>Numbers in detail for {selectedCountry} </Title>
 
             <Columns
-              style={{ marginBottom: 48, borderBottom: '1px solid #797979' }}
+              style={{ marginBottom: 48, borderBottom: '1px solid #f6f6f6' }}
             >
               <Column isSize={{ mobile: 12, isDesktop: 6 }}>
                 <AreaChart
@@ -273,9 +269,9 @@ class Drawer extends PureComponent {
                 </AreaChart>
               </Column>
 
-              <Column isSize={{ mobile: 6, isDesktop: 3 }}>
-                <Subtitle hasTextAlign="left">
-                  total of{' '}
+              <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
+                <Subtitle>
+                  as of today, total of{' '}
                   <Heading style={{ fontSize: 48 }}>
                     <b>
                       {data &&
@@ -289,7 +285,7 @@ class Drawer extends PureComponent {
             </Columns>
 
             <Columns
-              style={{ marginBottom: 48, borderBottom: '1px solid #797979' }}
+              style={{ marginBottom: 48, borderBottom: '1px solid #f6f6f6' }}
             >
               <Column isSize={{ mobile: 12, isDesktop: 6 }}>
                 <AreaChart
@@ -323,9 +319,9 @@ class Drawer extends PureComponent {
                 </AreaChart>
               </Column>
 
-              <Column isSize={{ mobile: 6, isDesktop: 3 }}>
-                <Subtitle hasTextAlign="left">
-                  total of{' '}
+              <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
+                <Subtitle>
+                  as of today, total of{' '}
                   <Heading style={{ fontSize: 48 }}>
                     <b>
                       {data &&
@@ -337,8 +333,8 @@ class Drawer extends PureComponent {
                 </Subtitle>
               </Column>
 
-              <Column isSize={{ mobile: 6, isDesktop: 3 }}>
-                <Subtitle hasTextAlign="left">
+              <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
+                <Subtitle>
                   with{' '}
                   <Heading style={{ fontSize: 48 }}>
                     <b>
@@ -390,8 +386,8 @@ class Drawer extends PureComponent {
                 </AreaChart>
               </Column>
 
-              <Column isSize={{ mobile: 6, isDesktop: 3 }}>
-                <Subtitle hasTextAlign="left">
+              <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
+                <Subtitle>
                   total of{' '}
                   <Heading style={{ fontSize: 48 }}>
                     <b>
@@ -404,8 +400,8 @@ class Drawer extends PureComponent {
                 </Subtitle>
               </Column>
 
-              <Column isSize={{ mobile: 6, isDesktop: 3 }}>
-                <Subtitle hasTextAlign="left">
+              <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
+                <Subtitle>
                   with{' '}
                   <Heading style={{ fontSize: 48 }}>
                     <b>
