@@ -321,7 +321,7 @@ class Drawer extends PureComponent {
 
               <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
                 <Subtitle>
-                  as of today, total of{' '}
+                  total of{' '}
                   <Heading style={{ fontSize: 48 }}>
                     <b>
                       {data &&

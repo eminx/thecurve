@@ -1,5 +1,5 @@
 import React from 'react';
-import { Container, Heading, Title, Subtitle } from 'bloomer';
+import { Container, Heading, Subtitle } from 'bloomer';
 import './App.css';
 import 'bulma/css/bulma.css';
 
