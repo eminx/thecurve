@@ -48,7 +48,12 @@ class Drawer extends PureComponent {
   }
 
   updateDimensions = () => {
-    this.setState({ width: window.innerWidth, height: window.innerHeight });
+    const width =
+      window.innerWidth ||
+      document.documentElement.clientWidth ||
+      document.body.clientWidth;
+
+    this.setState({ width });
   };
 
   getCountryByIP = () => {
@@ -164,7 +169,7 @@ class Drawer extends PureComponent {
         <div>
           <Box style={{ marginTop: 12 }}>
             <Columns>
-              <Column isSize={{ mobile: 12, isDesktop: 4 }}>
+              <Column isSize={{ mobile: 12, desktop: 4 }}>
                 <Select
                   isClearable
                   placeholder={
@@ -175,7 +180,7 @@ class Drawer extends PureComponent {
                   options={countries}
                 />
               </Column>
-              <Column isSize={{ mobile: 12, isDesktop: 4 }}>
+              <Column isSize={{ mobile: 12, desktop: 4 }}>
                 <Select
                   isSearchable={false}
                   placeholder={<b>{selectedDateInterval}</b>}
@@ -184,7 +189,7 @@ class Drawer extends PureComponent {
                   options={dateIntervals}
                 />
               </Column>
-              <Column isSize={{ mobile: 12, isDesktop: 4 }}>
+              <Column isSize={{ mobile: 12, desktop: 4 }}>
                 <Subtitle isSize={5} hasTextAlign="right">
                   <em>
                     Numbers indicate total instances <b>by date</b>, not per
@@ -256,10 +261,17 @@ class Drawer extends PureComponent {
           <Box style={{ padding: 24 }}>
             <Title isSize={4}>Numbers in detail for {selectedCountry} </Title>
 
-            <Columns
-              style={{ marginBottom: 48, borderBottom: '1px solid #f6f6f6' }}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'stretch',
+                alignItems: 'center',
+                marginBottom: 48,
+                borderBottom: '1px solid #f6f6f6',
+                flexWrap: 'wrap',
+              }}
             >
-              <Column isSize={{ mobile: 12, isDesktop: 6 }}>
+              <div style={{ flexBasis: 300 }}>
                 <AreaChart
                   width={
                     width > 980
@@ -289,27 +301,30 @@ class Drawer extends PureComponent {
                     fill={colors.diagnosed}
                   />
                 </AreaChart>
-              </Column>
+              </div>
 
-              <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
-                <Subtitle>
-                  as of today, total of{' '}
-                  <Heading style={{ fontSize: 48 }}>
-                    <b>
-                      {data &&
-                        data[data.length - 1] &&
-                        data[data.length - 1].diagnosed}
-                    </b>{' '}
-                  </Heading>
-                  diagnosed
-                </Subtitle>
-              </Column>
-            </Columns>
+              <SideInfo
+                upText="as of today, total of"
+                center={
+                  data &&
+                  data[data.length - 1] &&
+                  data[data.length - 1].diagnosed
+                }
+                downText="diagnosed"
+              />
+            </div>
 
-            <Columns
-              style={{ marginBottom: 48, borderBottom: '1px solid #f6f6f6' }}
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'stretch',
+                alignItems: 'center',
+                marginBottom: 48,
+                borderBottom: '1px solid #f6f6f6',
+                flexWrap: 'wrap',
+              }}
             >
-              <Column isSize={{ mobile: 12, isDesktop: 6 }}>
+              <div style={{ flexBasis: 300 }}>
                 <AreaChart
                   width={
                     width > 980
@@ -339,44 +354,43 @@ class Drawer extends PureComponent {
                     fill={colors.recovered}
                   />
                 </AreaChart>
-              </Column>
+              </div>
 
-              <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
-                <Subtitle>
-                  total of{' '}
-                  <Heading style={{ fontSize: 48 }}>
-                    <b>
-                      {data &&
-                        data[data.length - 1] &&
-                        data[data.length - 1].recovered}
-                    </b>{' '}
-                  </Heading>
-                  recovered
-                </Subtitle>
-              </Column>
+              <SideInfo
+                upText="total of"
+                center={
+                  data &&
+                  data[data.length - 1] &&
+                  data[data.length - 1].recovered
+                }
+                downText="recovered"
+              />
+              <SideInfo
+                upText="with"
+                center={
+                  data &&
+                  data[data.length - 1] &&
+                  Math.round(
+                    (data[data.length - 1].recovered /
+                      data[data.length - 1].diagnosed) *
+                      100
+                  ) + '%'
+                }
+                downText="recovery rate"
+              />
+            </div>
 
-              <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
-                <Subtitle>
-                  with{' '}
-                  <Heading style={{ fontSize: 48 }}>
-                    <b>
-                      {data &&
-                        data[data.length - 1] &&
-                        Math.round(
-                          (data[data.length - 1].recovered /
-                            data[data.length - 1].diagnosed) *
-                            100
-                        )}
-                      %
-                    </b>{' '}
-                  </Heading>
-                  recovery rate
-                </Subtitle>
-              </Column>
-            </Columns>
-
-            <Columns>
-              <Column isSize={{ mobile: 12, isDesktop: 6 }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'stretch',
+                alignItems: 'center',
+                marginBottom: 48,
+                borderBottom: '1px solid #f6f6f6',
+                flexWrap: 'wrap',
+              }}
+            >
+              <div style={{ flexBasis: 300 }}>
                 <AreaChart
                   width={
                     width > 980
@@ -406,41 +420,30 @@ class Drawer extends PureComponent {
                     fill={colors.died}
                   />
                 </AreaChart>
-              </Column>
+              </div>
 
-              <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
-                <Subtitle>
-                  total of{' '}
-                  <Heading style={{ fontSize: 48 }}>
-                    <b>
-                      {data &&
-                        data[data.length - 1] &&
-                        data[data.length - 1].died}
-                    </b>{' '}
-                  </Heading>
-                  died
-                </Subtitle>
-              </Column>
+              <SideInfo
+                upText="total of"
+                center={
+                  data && data[data.length - 1] && data[data.length - 1].died
+                }
+                downText="died"
+              />
 
-              <Column isSize={{ mobile: 6, isDesktop: 3 }} hasTextAlign="right">
-                <Subtitle>
-                  with{' '}
-                  <Heading style={{ fontSize: 48 }}>
-                    <b>
-                      {data &&
-                        data[data.length - 1] &&
-                        Math.round(
-                          (data[data.length - 1].died /
-                            data[data.length - 1].diagnosed) *
-                            100
-                        )}
-                      %
-                    </b>{' '}
-                  </Heading>
-                  death rate
-                </Subtitle>
-              </Column>
-            </Columns>
+              <SideInfo
+                upText="with"
+                downText="death rate"
+                center={
+                  data &&
+                  data[data.length - 1] &&
+                  Math.round(
+                    (data[data.length - 1].died /
+                      data[data.length - 1].diagnosed) *
+                      100
+                  ) + '%'
+                }
+              />
+            </div>
           </Box>
         </div>
       </div>
@@ -455,6 +458,26 @@ const legendCircleStyle = (color) => ({
   backgroundColor: color,
   marginRight: 4,
 });
+
+function SideInfo({ upText, center, downText }) {
+  return (
+    <Subtitle
+      style={{
+        flexBasis: 120,
+        flexGrow: 2,
+        marginBottom: 0,
+        textAlign: 'right',
+        padding: 24,
+      }}
+    >
+      {upText}
+      <Heading style={{ fontSize: '2rem' }}>
+        <b>{center}</b>{' '}
+      </Heading>
+      {downText}
+    </Subtitle>
+  );
+}
 
 function LegendCircle({ type, color }) {
   return (
