@@ -40,8 +40,16 @@ class Drawer extends PureComponent {
 
   componentDidMount() {
     this.getCountryByIP();
-    // this.getData();
+    window.addEventListener('resize', this.updateDimensions);
   }
+
+  componentWillUnmount() {
+    window.removeEventListener('resize', this.updateDimensions);
+  }
+
+  updateDimensions = () => {
+    this.setState({ width: window.innerWidth, height: window.innerHeight });
+  };
 
   getCountryByIP = () => {
     fetch('https://ipapi.co/json')
@@ -229,6 +237,12 @@ class Drawer extends PureComponent {
                 dataKey="unrecovered"
                 stroke={colors.unrecovered}
                 fill={colors.unrecovered}
+              />
+              <Area
+                type="monotone"
+                dataKey="recovered"
+                stroke={colors.recovered}
+                fill={colors.recovered}
               />
               <Area
                 type="monotone"
