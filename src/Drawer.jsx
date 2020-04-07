@@ -11,12 +11,13 @@ import {
 } from 'recharts';
 
 const apiEndpoint = 'https://pomber.github.io/covid19/timeseries.json';
+const ipApi = 'https://ipapi.co/json';
 
 const colors = {
-  diagnosed: 'hsla(27, 100%, 51%, 1)',
+  died: 'hsla(0, 100%, 51%, 1)',
   recovered: 'hsla(91, 100%, 51%, 1)',
   unrecovered: 'hsla(15, 100%, 51%, 1)',
-  died: 'hsla(0, 100%, 51%, 1)',
+  diagnosed: 'hsla(27, 100%, 51%, 1)',
 };
 
 const dates = ['last 30 days', 'last 7 days', 'since 22nd January'];
@@ -26,7 +27,7 @@ class Drawer extends PureComponent {
     super(props);
     this.state = {
       data: [],
-      selectedCountry: 'Norway',
+      selectedCountry: 'Sri Lanka',
       loading: true,
       countries: [],
       dateIntervals: dates.map((date) => ({ label: date, value: date })),
@@ -57,7 +58,7 @@ class Drawer extends PureComponent {
   };
 
   getCountryByIP = () => {
-    fetch('https://ipapi.co/json')
+    fetch(ipApi)
       .then((response) => response.json())
       .then((data) => {
         this.setState(
@@ -168,94 +169,164 @@ class Drawer extends PureComponent {
       >
         <div>
           <Box style={{ marginTop: 12 }}>
-            <Columns>
-              <Column isSize={{ mobile: 12, desktop: 4 }}>
-                <Select
-                  isClearable
-                  placeholder={
-                    <b style={{ color: '#3e3e3e' }}>{selectedCountry}</b>
-                  }
-                  value={selectedCountry}
-                  onChange={this.handleCountrySelect}
-                  options={countries}
-                />
-              </Column>
-              <Column isSize={{ mobile: 12, desktop: 4 }}>
-                <Select
-                  isSearchable={false}
-                  placeholder={<b>{selectedDateInterval}</b>}
-                  value={selectedDateInterval}
-                  onChange={this.handleIntervalSelect}
-                  options={dateIntervals}
-                />
-              </Column>
-              <Column isSize={{ mobile: 12, desktop: 4 }}>
+            <div
+              style={{
+                display: 'flex',
+                width: '100%',
+                justifyContent: 'stretch',
+              }}
+            >
+              <Select
+                isClearable
+                placeholder={
+                  <b style={{ color: '#3e3e3e' }}>{selectedCountry}</b>
+                }
+                value={selectedCountry}
+                onChange={this.handleCountrySelect}
+                options={countries}
+                styles={{
+                  container: (provided) => ({
+                    flexGrow: 1,
+                    paddingRight: 6,
+                    ...provided,
+                  }),
+                }}
+              />
+              <Select
+                isSearchable={false}
+                placeholder={
+                  <b style={{ color: '#3e3e3e' }}>{selectedDateInterval}</b>
+                }
+                value={selectedDateInterval}
+                onChange={this.handleIntervalSelect}
+                options={dateIntervals}
+                styles={{
+                  container: (provided) => ({ flexGrow: 1, ...provided }),
+                }}
+              />
+            </div>
+
+            {/* <Column isSize={{ mobile: 12, desktop: 4 }}>
                 <Subtitle isSize={5} hasTextAlign="right">
                   <em>
                     Numbers indicate total instances <b>by date</b>, not per
                     date.
                   </em>
                 </Subtitle>
-              </Column>
-            </Columns>
+              </Column> */}
           </Box>
 
-          <Box style={{ padding: 24 }}>
-            <Title isSize={4}>
-              Total Numbers for {selectedCountry} in {selectedDateInterval}
-            </Title>
+          <div>
+            <Subtitle
+              isSize={6}
+              hasTextAlign="centered"
+              style={{ marginBottom: 0 }}
+            >
+              Yesterday:
+            </Subtitle>
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'row-reverse',
                 flexWrap: 'wrap',
+                flexBasis: 300,
+                justifyContent: 'center',
+                marginBottom: 12,
+              }}
+            >
+              {Object.keys(colors)
+                .filter((color) => color !== 'unrecovered')
+                .map((type, index) => (
+                  <Heading key={type} style={{ paddingRight: 12 }}>
+                    <b style={{ fontSize: '150%' }}>
+                      {data[data.length - 1] &&
+                        data[data.length - 1][type] -
+                          data[data.length - 2][type]}
+                    </b>{' '}
+                    {type}
+                  </Heading>
+                ))}
+            </div>
+          </div>
+
+          <Box style={{ padding: 24 }}>
+            <Subtitle
+              isSize={6}
+              hasTextAlign="centered"
+              style={{ marginBottom: 0 }}
+            >
+              Total:
+            </Subtitle>
+            <div
+              style={{
+                display: 'flex',
+                flexDirection: 'row-reverse',
+                flexWrap: 'wrap',
+                justifyContent: 'center',
+                marginBottom: 24,
               }}
             >
               {Object.keys(colors).map((type, index) => (
-                <LegendCircle key={type} type={type} color={colors[type]} />
+                <LegendCircle
+                  key={type}
+                  type={type}
+                  color={colors[type]}
+                  number={data[data.length - 1] && data[data.length - 1][type]}
+                />
               ))}
             </div>
-            <AreaChart
-              width={width > 980 ? 960 : width - 48}
-              height={500}
-              data={data}
-              syncId="date"
-              margin={{
-                top: 10,
-                right: 30,
-                left: 0,
-                bottom: 0,
-              }}
+
+            <Title
+              hasTextAlign="centered"
+              isSize={5}
+              style={{ paddingRight: 24 }}
             >
-              <CartesianGrid strokeDasharray="1 3" />
-              <XAxis dataKey="date" />
-              <YAxis />
-              <Tooltip />
-              <Area
-                type="monotone"
-                dataKey="diagnosed"
-                stroke={colors.diagnosed}
-                fill={colors.diagnosed}
-              />
-              <Area
-                type="monotone"
-                dataKey="unrecovered"
-                stroke={colors.unrecovered}
-                fill={colors.unrecovered}
-              />
-              <Area
-                type="monotone"
-                dataKey="recovered"
-                stroke={colors.recovered}
-                fill={colors.recovered}
-              />
-              <Area
-                type="monotone"
-                dataKey="died"
-                stroke={colors.died}
-                fill={colors.died}
-              />
-            </AreaChart>
+              {selectedCountry} in {selectedDateInterval}
+            </Title>
+
+            {data && data.length > 0 && (
+              <AreaChart
+                width={width > 980 ? 960 : width - 48}
+                height={400}
+                data={data}
+                syncId="date"
+                margin={{
+                  top: 10,
+                  right: 30,
+                  left: 0,
+                  bottom: 0,
+                }}
+              >
+                <CartesianGrid strokeDasharray="1 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Area
+                  type="monotone"
+                  dataKey="diagnosed"
+                  stroke={colors.diagnosed}
+                  fill={colors.diagnosed}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="unrecovered"
+                  stroke={colors.unrecovered}
+                  fill={colors.unrecovered}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="recovered"
+                  stroke={colors.recovered}
+                  fill={colors.recovered}
+                />
+                <Area
+                  type="monotone"
+                  dataKey="died"
+                  stroke={colors.died}
+                  fill={colors.died}
+                />
+              </AreaChart>
+            )}
           </Box>
 
           <Box style={{ padding: 24 }}>
@@ -451,14 +522,6 @@ class Drawer extends PureComponent {
   }
 }
 
-const legendCircleStyle = (color) => ({
-  width: 12,
-  height: 12,
-  borderRadius: '50%',
-  backgroundColor: color,
-  marginRight: 4,
-});
-
 function SideInfo({ upText, center, downText }) {
   return (
     <Subtitle
@@ -467,11 +530,13 @@ function SideInfo({ upText, center, downText }) {
         flexGrow: 2,
         marginBottom: 0,
         textAlign: 'right',
-        padding: 24,
+        paddingRight: 24,
+        paddingTop: 12,
+        paddingBottom: 12,
       }}
     >
       {upText}
-      <Heading style={{ fontSize: '2rem' }}>
+      <Heading style={{ fontSize: '1.8rem' }}>
         <b>{center}</b>{' '}
       </Heading>
       {downText}
@@ -479,7 +544,15 @@ function SideInfo({ upText, center, downText }) {
   );
 }
 
-function LegendCircle({ type, color }) {
+const legendCircleStyle = (color) => ({
+  width: 12,
+  height: 12,
+  borderRadius: '50%',
+  backgroundColor: color,
+  marginRight: 4,
+});
+
+function LegendCircle({ type, color, number }) {
   return (
     <div
       style={{
@@ -490,7 +563,9 @@ function LegendCircle({ type, color }) {
       }}
     >
       <div style={legendCircleStyle(color)} />
-      <Heading style={{ marginBottom: 0 }}>{type}</Heading>
+      <Heading style={{ marginBottom: 0 }}>
+        <b style={{ fontSize: '150%' }}>{number}</b> {type}
+      </Heading>
     </div>
   );
 }
