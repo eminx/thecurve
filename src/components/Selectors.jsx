@@ -29,6 +29,10 @@ function Selectors({
             paddingRight: 6,
             ...provided,
           }),
+          placeholder: (provided) => ({
+            whiteSpace: 'nowrap',
+            ...provided,
+          }),
         }}
       />
       <Select
@@ -39,6 +43,10 @@ function Selectors({
         options={dateIntervals}
         styles={{
           container: (provided) => ({ flexGrow: 1, ...provided }),
+          placeholder: (provided) => ({
+            whiteSpace: 'nowrap',
+            ...provided,
+          }),
         }}
       />
     </div>
