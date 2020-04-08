@@ -285,7 +285,9 @@ class Drawer extends PureComponent {
               isSize={5}
               style={{ paddingRight: 24 }}
             >
-              {selectedCountry} in {selectedDateInterval}
+              {selectedCountry}{' '}
+              {selectedDateInterval === dates[2] ? ' ' : ' in '}{' '}
+              {selectedDateInterval}
             </Title>
 
             {data && data.length > 0 && (
