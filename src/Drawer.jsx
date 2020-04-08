@@ -1,5 +1,13 @@
 import React, { PureComponent } from 'react';
-import { Box, Columns, Heading, Column, Title, Subtitle } from 'bloomer';
+import {
+  Box,
+  Container,
+  Button,
+  Notification,
+  Heading,
+  Title,
+  Subtitle,
+} from 'bloomer';
 import Select from 'react-select';
 import {
   AreaChart,
@@ -9,6 +17,8 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts';
+
+import { LoaderX } from './components/Loader';
 
 const apiEndpoint = 'https://pomber.github.io/covid19/timeseries.json';
 const ipApi = 'https://ipapi.co/json';
@@ -27,7 +37,7 @@ class Drawer extends PureComponent {
     super(props);
     this.state = {
       data: [],
-      selectedCountry: 'Sri Lanka',
+      selectedCountry: null,
       loading: true,
       countries: [],
       dateIntervals: dates.map((date) => ({ label: date, value: date })),
@@ -36,6 +46,7 @@ class Drawer extends PureComponent {
         window.innerWidth ||
         document.documentElement.clientWidth ||
         document.body.clientWidth,
+      isBlocked: false,
     };
   }
 
@@ -58,6 +69,10 @@ class Drawer extends PureComponent {
   };
 
   getCountryByIP = () => {
+    this.setState({
+      loading: true,
+    });
+
     fetch(ipApi)
       .then((response) => response.json())
       .then((data) => {
@@ -67,6 +82,12 @@ class Drawer extends PureComponent {
           },
           () => this.getData()
         );
+      })
+      .catch((error) => {
+        this.setState({
+          isBlocked: true,
+          loading: false,
+        });
       });
   };
 
@@ -75,6 +96,7 @@ class Drawer extends PureComponent {
     if (!selectedCountry) {
       return;
     }
+
     const daysCount = this.getDaysCount();
 
     fetch(apiEndpoint)
@@ -107,6 +129,12 @@ class Drawer extends PureComponent {
             label: country === 'US' ? 'United States' : country,
             value: country,
           })),
+          loading: false,
+        });
+      })
+      .catch((error) => {
+        this.setState({
+          isBlocked: true,
           loading: false,
         });
       });
@@ -156,7 +184,28 @@ class Drawer extends PureComponent {
       dateIntervals,
       selectedDateInterval,
       width,
+      isBlocked,
+      loading,
     } = this.state;
+
+    if (!selectedCountry && isBlocked) {
+      return (
+        <div style={{ padding: 24, maxWidth: 480, margin: '0 auto' }}>
+          <Notification isColor="warning">
+            We can not fetch data. Seems like you may have a blocker that
+            prevents that. Please check your browser settings and see if you
+            have installed extensions that prevents data fetching.
+          </Notification>
+          <Container>
+            <Button onClick={() => this.getCountryByIP()}>Try again</Button>
+          </Container>
+        </div>
+      );
+    }
+
+    if (loading) {
+      return <LoaderX />;
+    }
 
     return (
       <div
@@ -224,6 +273,7 @@ class Drawer extends PureComponent {
             >
               Yesterday:
             </Subtitle>
+
             <div
               style={{
                 display: 'flex',
@@ -234,18 +284,20 @@ class Drawer extends PureComponent {
                 marginBottom: 12,
               }}
             >
-              {Object.keys(colors)
-                .filter((color) => color !== 'unrecovered')
-                .map((type, index) => (
-                  <Heading key={type} style={{ paddingRight: 12 }}>
-                    <b style={{ fontSize: '150%' }}>
-                      {data[data.length - 1] &&
-                        data[data.length - 1][type] -
-                          data[data.length - 2][type]}
-                    </b>{' '}
-                    {type}
-                  </Heading>
-                ))}
+              {data &&
+                data.length > 0 &&
+                Object.keys(colors)
+                  .filter((color) => color !== 'unrecovered')
+                  .map((type, index) => (
+                    <Heading key={type} style={{ paddingRight: 12 }}>
+                      <b style={{ fontSize: '150%' }}>
+                        {data[data.length - 1] &&
+                          data[data.length - 1][type] -
+                            data[data.length - 2][type]}
+                      </b>{' '}
+                      {type}
+                    </Heading>
+                  ))}
             </div>
           </div>
 
