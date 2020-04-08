@@ -1,14 +1,5 @@
 import React, { PureComponent } from 'react';
-import {
-  Box,
-  Container,
-  Button,
-  Notification,
-  Heading,
-  Title,
-  Subtitle,
-} from 'bloomer';
-import Select from 'react-select';
+import { Box, Heading, Title, Subtitle } from 'bloomer';
 import {
   AreaChart,
   Area,
@@ -18,7 +9,7 @@ import {
   Tooltip,
 } from 'recharts';
 
-import { LoaderX } from './components/Loader';
+import { Loader, DataError, Selectors } from './components/';
 
 const apiEndpoint = 'https://pomber.github.io/covid19/timeseries.json';
 const ipApi = 'https://ipapi.co/json';
@@ -189,22 +180,11 @@ class Drawer extends PureComponent {
     } = this.state;
 
     if (!selectedCountry && isBlocked) {
-      return (
-        <div style={{ padding: 24, maxWidth: 480, margin: '0 auto' }}>
-          <Notification isColor="warning">
-            We can not fetch data. Seems like you may have a blocker that
-            prevents that. Please check your browser settings and see if you
-            have installed extensions that prevents data fetching.
-          </Notification>
-          <Container>
-            <Button onClick={() => this.getCountryByIP()}>Try again</Button>
-          </Container>
-        </div>
-      );
+      return <DataError onButtonClick={() => this.getCountryByIP()} />;
     }
 
     if (loading) {
-      return <LoaderX />;
+      return <Loader />;
     }
 
     return (
@@ -218,42 +198,14 @@ class Drawer extends PureComponent {
       >
         <div>
           <Box style={{ marginTop: 12 }}>
-            <div
-              style={{
-                display: 'flex',
-                width: '100%',
-                justifyContent: 'stretch',
-              }}
-            >
-              <Select
-                isClearable
-                placeholder={
-                  <b style={{ color: '#3e3e3e' }}>{selectedCountry}</b>
-                }
-                value={selectedCountry}
-                onChange={this.handleCountrySelect}
-                options={countries}
-                styles={{
-                  container: (provided) => ({
-                    flexGrow: 1,
-                    paddingRight: 6,
-                    ...provided,
-                  }),
-                }}
-              />
-              <Select
-                isSearchable={false}
-                placeholder={
-                  <b style={{ color: '#3e3e3e' }}>{selectedDateInterval}</b>
-                }
-                value={selectedDateInterval}
-                onChange={this.handleIntervalSelect}
-                options={dateIntervals}
-                styles={{
-                  container: (provided) => ({ flexGrow: 1, ...provided }),
-                }}
-              />
-            </div>
+            <Selectors
+              selectedCountry={selectedCountry}
+              handleCountrySelect={this.handleCountrySelect}
+              countries={countries}
+              selectedDateInterval={selectedDateInterval}
+              handleIntervalSelect={this.handleIntervalSelect}
+              dateIntervals={dateIntervals}
+            />
 
             {/* <Column isSize={{ mobile: 12, desktop: 4 }}>
                 <Subtitle isSize={5} hasTextAlign="right">

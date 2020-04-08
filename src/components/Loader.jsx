@@ -1,7 +1,7 @@
 import React from 'react';
 import { Notification } from 'bloomer';
 
-function LoaderX(props) {
+function Loader(props) {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: 24 }}>
       <Notification>Loading data...</Notification>
@@ -9,4 +9,4 @@ function LoaderX(props) {
   );
 }
 
-export { LoaderX };
+export default Loader;
