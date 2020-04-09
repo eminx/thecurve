@@ -1,4 +1,4 @@
-import React, { Children } from 'react';
+import React from 'react';
 import {
   AreaChart,
   Area,
@@ -7,8 +7,9 @@ import {
   CartesianGrid,
   Tooltip,
 } from 'recharts';
+import { Subtitle, Heading } from 'bloomer';
 
-function WidgetGraph({ colors, data, width, fill }) {
+function WidgetGraph({ data, dataKey, width, color }) {
   return (
     <div
       style={{
@@ -37,10 +38,33 @@ function WidgetGraph({ colors, data, width, fill }) {
           <XAxis dataKey="date" />
           <YAxis />
           <Tooltip />
-          <Area type="monotone" dataKey="recovered" stroke={fill} fill={fill} />
+          <Area type="monotone" dataKey={dataKey} stroke={color} fill={color} />
         </AreaChart>
       </div>
-      {children}
     </div>
   );
 }
+
+function WidgetAside({ upText, center, downText }) {
+  return (
+    <Subtitle
+      style={{
+        flexBasis: 120,
+        flexGrow: 2,
+        marginBottom: 0,
+        textAlign: 'right',
+        paddingRight: 24,
+        paddingTop: 12,
+        paddingBottom: 12,
+      }}
+    >
+      {upText}
+      <Heading style={{ fontSize: '1.8rem' }}>
+        <b>{center}</b>{' '}
+      </Heading>
+      {downText}
+    </Subtitle>
+  );
+}
+
+export { WidgetGraph, WidgetAside };

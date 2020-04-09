@@ -1,15 +1,15 @@
 import React, { PureComponent } from 'react';
 import { Box, Heading, Title, Subtitle } from 'bloomer';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-} from 'recharts';
 
-import { Loader, DataError, Selectors } from './components/';
+import {
+  MainChart,
+  Loader,
+  DataError,
+  Selectors,
+  WidgetGraph,
+  WidgetAside,
+} from './components/';
+
 import allCountries from './allCountries';
 
 const apiEndpoint = 'https://pomber.github.io/covid19/timeseries.json';
@@ -31,7 +31,7 @@ class Drawer extends PureComponent {
       data: [],
       selectedCountry: null,
       loading: true,
-      countries: [],
+      countries: allCountries,
       dateIntervals: dates.map((date) => ({ label: date, value: date })),
       selectedDateInterval: dates[0],
       width:
@@ -89,8 +89,6 @@ class Drawer extends PureComponent {
       return;
     }
 
-    const daysCount = this.getDaysCount();
-
     fetch(apiEndpoint)
       .then((response) => response.json())
       .then((data) => {
@@ -107,29 +105,12 @@ class Drawer extends PureComponent {
           ...data,
         };
 
-        const newData = parsedData[selectedCountry]
-          .filter((info, index) => {
-            if (daysCount === 0) {
-              return true;
-            }
-            return index > parsedData[selectedCountry].length - daysCount - 1;
-          })
-          .map(({ date, confirmed, recovered, deaths }) => ({
-            diagnosed: confirmed,
-            recovered: recovered,
-            unrecovered: confirmed - recovered - deaths,
-            died: deaths,
-            date: date.substring(5, date.length),
-          }));
-
-        this.setState({
-          data: newData,
-          countries: allCountries.map((country) => ({
-            label: country,
-            value: country,
-          })),
-          loading: false,
-        });
+        this.setState(
+          {
+            allData: parsedData,
+          },
+          () => this.setCountryBasedData()
+        );
       })
       .catch((error) => {
         this.setState({
@@ -137,6 +118,31 @@ class Drawer extends PureComponent {
           loading: false,
         });
       });
+  };
+
+  setCountryBasedData = () => {
+    const { allData, selectedCountry } = this.state;
+    const daysCount = this.getDaysCount();
+
+    const selectedCountryData = allData[selectedCountry]
+      .filter((info, index) => {
+        if (daysCount === 0) {
+          return true;
+        }
+        return index > allData[selectedCountry].length - daysCount - 1;
+      })
+      .map(({ date, confirmed, recovered, deaths }) => ({
+        diagnosed: confirmed,
+        recovered: recovered,
+        unrecovered: confirmed - recovered - deaths,
+        died: deaths,
+        date: date.substring(5, date.length),
+      }));
+
+    this.setState({
+      data: selectedCountryData,
+      loading: false,
+    });
   };
 
   getDaysCount = () => {
@@ -162,7 +168,7 @@ class Drawer extends PureComponent {
       {
         selectedCountry: country.value,
       },
-      () => this.getData()
+      () => this.setCountryBasedData()
     );
   };
 
@@ -171,7 +177,7 @@ class Drawer extends PureComponent {
       {
         selectedDateInterval: interval.value,
       },
-      () => this.getData()
+      () => this.setCountryBasedData()
     );
   };
 
@@ -214,15 +220,6 @@ class Drawer extends PureComponent {
               handleIntervalSelect={this.handleIntervalSelect}
               dateIntervals={dateIntervals}
             />
-
-            {/* <Column isSize={{ mobile: 12, desktop: 4 }}>
-                <Subtitle isSize={5} hasTextAlign="right">
-                  <em>
-                    Numbers indicate total instances <b>by date</b>, not per
-                    date.
-                  </em>
-                </Subtitle>
-              </Column> */}
           </Box>
 
           <div>
@@ -299,47 +296,7 @@ class Drawer extends PureComponent {
             </Title>
 
             {data && data.length > 0 && (
-              <AreaChart
-                width={width > 980 ? 960 : width - 48}
-                height={400}
-                data={data}
-                syncId="date"
-                margin={{
-                  top: 10,
-                  right: 30,
-                  left: 0,
-                  bottom: 0,
-                }}
-              >
-                <CartesianGrid strokeDasharray="1 3" />
-                <XAxis dataKey="date" />
-                <YAxis />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="diagnosed"
-                  stroke={colors.diagnosed}
-                  fill={colors.diagnosed}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="unrecovered"
-                  stroke={colors.unrecovered}
-                  fill={colors.unrecovered}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="recovered"
-                  stroke={colors.recovered}
-                  fill={colors.recovered}
-                />
-                <Area
-                  type="monotone"
-                  dataKey="died"
-                  stroke={colors.died}
-                  fill={colors.died}
-                />
-              </AreaChart>
+              <MainChart data={data} colors={colors} width={width} />
             )}
           </Box>
 
@@ -357,38 +314,15 @@ class Drawer extends PureComponent {
               }}
             >
               <div style={{ flexBasis: 300 }}>
-                <AreaChart
-                  width={
-                    width > 980
-                      ? 480
-                      : width > 720
-                      ? width / 2 - 40
-                      : width - 40
-                  }
-                  height={200}
+                <WidgetGraph
+                  color={colors.diagnosed}
                   data={data}
-                  syncId="date"
-                  margin={{
-                    top: 10,
-                    right: 30,
-                    left: 0,
-                    bottom: 0,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="diagnosed"
-                    stroke={colors.diagnosed}
-                    fill={colors.diagnosed}
-                  />
-                </AreaChart>
+                  dataKey="diagnosed"
+                  width={width}
+                />
               </div>
 
-              <SideInfo
+              <WidgetAside
                 upText="as of today, total of"
                 center={
                   data &&
@@ -410,38 +344,15 @@ class Drawer extends PureComponent {
               }}
             >
               <div style={{ flexBasis: 300 }}>
-                <AreaChart
-                  width={
-                    width > 980
-                      ? 480
-                      : width > 720
-                      ? width / 2 - 40
-                      : width - 40
-                  }
-                  height={200}
+                <WidgetGraph
+                  color={colors.recovered}
                   data={data}
-                  syncId="date"
-                  margin={{
-                    top: 10,
-                    right: 30,
-                    left: 0,
-                    bottom: 0,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="recovered"
-                    stroke={colors.recovered}
-                    fill={colors.recovered}
-                  />
-                </AreaChart>
+                  dataKey="recovered"
+                  width={width}
+                />
               </div>
 
-              <SideInfo
+              <WidgetAside
                 upText="total of"
                 center={
                   data &&
@@ -450,7 +361,7 @@ class Drawer extends PureComponent {
                 }
                 downText="recovered"
               />
-              <SideInfo
+              <WidgetAside
                 upText="with"
                 center={
                   data &&
@@ -476,46 +387,22 @@ class Drawer extends PureComponent {
               }}
             >
               <div style={{ flexBasis: 300 }}>
-                <AreaChart
-                  width={
-                    width > 980
-                      ? 480
-                      : width > 720
-                      ? width / 2 - 40
-                      : width - 40
-                  }
-                  height={200}
+                <WidgetGraph
+                  color={colors.died}
                   data={data}
-                  syncId="date"
-                  margin={{
-                    top: 10,
-                    right: 30,
-                    left: 0,
-                    bottom: 0,
-                  }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="date" />
-                  <YAxis />
-                  <Tooltip />
-                  <Area
-                    type="monotone"
-                    dataKey="died"
-                    stroke={colors.died}
-                    fill={colors.died}
-                  />
-                </AreaChart>
+                  dataKey="died"
+                  width={width}
+                />
               </div>
 
-              <SideInfo
+              <WidgetAside
                 upText="total of"
                 center={
                   data && data[data.length - 1] && data[data.length - 1].died
                 }
                 downText="died"
               />
-
-              <SideInfo
+              <WidgetAside
                 upText="with"
                 downText="death rate"
                 center={
@@ -534,28 +421,6 @@ class Drawer extends PureComponent {
       </div>
     );
   }
-}
-
-function SideInfo({ upText, center, downText }) {
-  return (
-    <Subtitle
-      style={{
-        flexBasis: 120,
-        flexGrow: 2,
-        marginBottom: 0,
-        textAlign: 'right',
-        paddingRight: 24,
-        paddingTop: 12,
-        paddingBottom: 12,
-      }}
-    >
-      {upText}
-      <Heading style={{ fontSize: '1.8rem' }}>
-        <b>{center}</b>{' '}
-      </Heading>
-      {downText}
-    </Subtitle>
-  );
 }
 
 const legendCircleStyle = (color) => ({

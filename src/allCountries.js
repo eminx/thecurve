@@ -1,4 +1,4 @@
-const allCountries = [
+const countries = [
   'Afghanistan',
   'Albania',
   'Algeria',
@@ -184,5 +184,10 @@ const allCountries = [
   'Western Sahara',
   'Sao Tome and Principe',
 ];
+
+const allCountries = countries.map((country) => ({
+  label: country,
+  value: country,
+}));
 
 export default allCountries;
