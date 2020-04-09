@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 
 import { Loader, DataError, Selectors } from './components/';
+import allCountries from './allCountries';
 
 const apiEndpoint = 'https://pomber.github.io/covid19/timeseries.json';
 const ipApi = 'https://ipapi.co/json';
@@ -93,16 +94,25 @@ class Drawer extends PureComponent {
     fetch(apiEndpoint)
       .then((response) => response.json())
       .then((data) => {
-        if (!data || !data[selectedCountry]) {
+        if (!data) {
+          this.setState({
+            loading: false,
+            isBlocked: true,
+          });
           return null;
         }
 
-        const newData = data[selectedCountry]
+        const parsedData = {
+          'United States': data['US'],
+          ...data,
+        };
+
+        const newData = parsedData[selectedCountry]
           .filter((info, index) => {
             if (daysCount === 0) {
               return true;
             }
-            return index > data[selectedCountry].length - daysCount - 1;
+            return index > parsedData[selectedCountry].length - daysCount - 1;
           })
           .map(({ date, confirmed, recovered, deaths }) => ({
             diagnosed: confirmed,
@@ -112,12 +122,10 @@ class Drawer extends PureComponent {
             date: date.substring(5, date.length),
           }));
 
-        const countries = Object.keys(data);
-
         this.setState({
           data: newData,
-          countries: countries.map((country) => ({
-            label: country === 'US' ? 'United States' : country,
+          countries: allCountries.map((country) => ({
+            label: country,
             value: country,
           })),
           loading: false,
