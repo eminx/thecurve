@@ -124,6 +124,11 @@ class Drawer extends PureComponent {
     const { allData, selectedCountry } = this.state;
     const daysCount = this.getDaysCount();
 
+    if (!allData) {
+      this.getData();
+      return;
+    }
+
     const selectedCountryData = allData[selectedCountry]
       .filter((info, index) => {
         if (daysCount === 0) {
@@ -160,7 +165,7 @@ class Drawer extends PureComponent {
   };
 
   handleCountrySelect = (country) => {
-    if (!country) {
+    if (!country || this.state.selectedCountry === country.value) {
       return;
     }
 
@@ -421,32 +426,6 @@ class Drawer extends PureComponent {
       </div>
     );
   }
-}
-
-const legendCircleStyle = (color) => ({
-  width: 12,
-  height: 12,
-  borderRadius: '50%',
-  backgroundColor: color,
-  marginRight: 4,
-});
-
-function LegendCircle({ type, color, number }) {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginRight: 24,
-      }}
-    >
-      <div style={legendCircleStyle(color)} />
-      <Heading style={{ marginBottom: 0 }}>
-        <b style={{ fontSize: '150%' }}>{number}</b> {type}
-      </Heading>
-    </div>
-  );
 }
 
 export default Drawer;
