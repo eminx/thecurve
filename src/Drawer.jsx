@@ -8,6 +8,7 @@ import {
   Selectors,
   WidgetGraph,
   WidgetAside,
+  LegendCircle,
 } from './components/';
 
 import allCountries from './allCountries';
