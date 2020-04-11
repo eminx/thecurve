@@ -1,5 +1,14 @@
 import React, { PureComponent } from 'react';
-import { Box, Heading, Title, Subtitle } from 'bloomer';
+import {
+  Box,
+  Heading,
+  Title,
+  Subtitle,
+  Container,
+  Field,
+  Control,
+  Radio,
+} from 'bloomer';
 import Checkbox from 'rc-checkbox';
 import 'rc-checkbox/assets/index.css';
 
@@ -10,7 +19,6 @@ import {
   Selectors,
   WidgetGraph,
   WidgetAside,
-  LegendCircle,
 } from './components/';
 
 import allCountries from './allCountries';
@@ -27,8 +35,8 @@ const colors = {
 
 const dates = ['last 30 days', 'last 7 days', 'since 22nd January'];
 
-const populations = require('country-json/src/country-by-population.json');
-console.log(populations.find((item) => item.country === 'Sri Lanka'));
+// const populations = require('country-json/src/country-by-population.json');
+// console.log(populations.find((item) => item.country === 'Sri Lanka'));
 
 class Drawer extends PureComponent {
   constructor(props) {
@@ -50,6 +58,7 @@ class Drawer extends PureComponent {
       isBlocked: false,
       error: null,
       isCompare: false,
+      selectedCompareType: 'diagnosed',
     };
   }
 
@@ -143,7 +152,7 @@ class Drawer extends PureComponent {
   };
 
   setCountriesCompareData = () => {
-    const { allData, selectedCountries } = this.state;
+    const { allData, selectedCountries, selectedCompareType } = this.state;
 
     if (!allData) {
       this.getData();
@@ -171,7 +180,8 @@ class Drawer extends PureComponent {
         date: dailyData.date,
       };
       countries.forEach((country) => {
-        instance[country] = wholeSet[country][mainIndex]['diagnosed'];
+        instance[country] = wholeSet[country][mainIndex][selectedCompareType];
+        console.log(instance);
       });
       dataSet.push(instance);
     });
@@ -244,11 +254,17 @@ class Drawer extends PureComponent {
   };
 
   handleIntervalSelect = (interval) => {
+    const { isCompare } = this.state;
+
+    const callback = isCompare
+      ? this.setCountriesCompareData
+      : this.setCountryBasedData;
+
     this.setState(
       {
         selectedDateInterval: interval.value,
       },
-      () => this.setCountryBasedData()
+      () => callback()
     );
   };
 
@@ -281,6 +297,12 @@ class Drawer extends PureComponent {
     }
   };
 
+  setCompareType = (type) => {
+    this.setState({ selectedCompareType: type }, () =>
+      this.setCountriesCompareData()
+    );
+  };
+
   render() {
     const {
       data,
@@ -293,6 +315,7 @@ class Drawer extends PureComponent {
       isBlocked,
       loading,
       isCompare,
+      selectedCompareType,
     } = this.state;
 
     if (!selectedCountry && isBlocked) {
@@ -329,223 +352,209 @@ class Drawer extends PureComponent {
             </label>
           </div>
           <Box style={{ marginTop: 12 }}>
-            <Selectors
-              selectedCountry={selectedCountry}
-              selectedCountries={selectedCountries}
-              handleCountrySelect={this.handleCountrySelect}
-              countries={countries}
-              selectedDateInterval={selectedDateInterval}
-              handleIntervalSelect={this.handleIntervalSelect}
-              dateIntervals={dateIntervals}
-              isMulti={isCompare}
-            />
-          </Box>
-
-          <div>
-            <Subtitle
-              isSize={6}
-              hasTextAlign="centered"
-              style={{ marginBottom: 0 }}
-            >
-              Yesterday:
-            </Subtitle>
-
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row-reverse',
-                flexWrap: 'wrap',
-                flexBasis: 300,
-                justifyContent: 'center',
-                marginBottom: 12,
-              }}
-            >
-              {data &&
-                data.length > 0 &&
-                Object.keys(colors)
-                  .filter((color) => color !== 'unrecovered')
-                  .map((type, index) => (
-                    <Heading key={type} style={{ paddingRight: 12 }}>
-                      <b style={{ fontSize: '150%' }}>
-                        {data[data.length - 1] &&
-                          data[data.length - 1][type] -
-                            data[data.length - 2][type]}
-                      </b>{' '}
-                      {type}
-                    </Heading>
-                  ))}
-            </div>
-          </div>
-
-          <Box style={{ padding: 24 }}>
-            <Subtitle
-              isSize={6}
-              hasTextAlign="centered"
-              style={{ marginBottom: 0 }}
-            >
-              Total:
-            </Subtitle>
-            <div
-              style={{
-                display: 'flex',
-                flexDirection: 'row-reverse',
-                flexWrap: 'wrap',
-                justifyContent: 'center',
-                marginBottom: 24,
-              }}
-            >
-              {Object.keys(colors).map((type, index) => (
-                <LegendCircle
-                  key={type}
-                  type={type}
-                  color={colors[type]}
-                  number={data[data.length - 1] && data[data.length - 1][type]}
-                />
-              ))}
-            </div>
-
-            <Title
-              hasTextAlign="centered"
-              isSize={5}
-              style={{ paddingRight: 24 }}
-            >
-              {selectedCountry}{' '}
-              {selectedDateInterval === dates[2] ? ' ' : ' in '}{' '}
-              {selectedDateInterval}
-            </Title>
-
-            {data && data.length > 0 && (
+            <Container>
+              <Selectors
+                selectedCountry={selectedCountry}
+                selectedCountries={selectedCountries}
+                handleCountrySelect={this.handleCountrySelect}
+                countries={countries}
+                selectedDateInterval={selectedDateInterval}
+                handleIntervalSelect={this.handleIntervalSelect}
+                dateIntervals={dateIntervals}
+                isMulti={isCompare}
+              />
+              {isCompare && (
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Field style={{ padding: 12 }}>
+                    <Control>
+                      {['diagnosed', 'died', 'recovered'].map((item) => (
+                        <Radio
+                          key={item}
+                          defaultChecked={item === selectedCompareType}
+                          checked={item === selectedCompareType}
+                          onChange={() => this.setCompareType(item)}
+                        >
+                          {' '}
+                          {item}
+                        </Radio>
+                      ))}
+                    </Control>
+                  </Field>
+                </div>
+              )}
+            </Container>
+            <Container>
               <MainChart
                 data={data}
                 colors={colors}
                 width={width}
                 isCompare={isCompare}
                 selectedCountries={selectedCountries}
+                selectedCountry={selectedCountry}
+                selectedDateInterval={selectedDateInterval}
+                dates={dates}
               />
-            )}
+            </Container>
           </Box>
 
-          <Box style={{ padding: 24 }}>
-            <Title isSize={4}>Numbers in detail for {selectedCountry} </Title>
+          {!isCompare && <TodayNumbers data={data} colors={colors} />}
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'stretch',
-                alignItems: 'center',
-                marginBottom: 48,
-                borderBottom: '1px solid #f6f6f6',
-                flexWrap: 'wrap',
-              }}
-            >
-              <div style={{ flexBasis: 300 }}>
-                <WidgetGraph
-                  color={colors.diagnosed}
-                  data={data}
-                  dataKey="diagnosed"
-                  width={width}
+          {!isCompare && (
+            <Box style={{ padding: 24 }}>
+              <Title isSize={4}>Numbers in detail for {selectedCountry} </Title>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'stretch',
+                  alignItems: 'center',
+                  marginBottom: 48,
+                  borderBottom: '1px solid #f6f6f6',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ flexBasis: 300 }}>
+                  <WidgetGraph
+                    color={colors.diagnosed}
+                    data={data}
+                    dataKey="diagnosed"
+                    width={width}
+                  />
+                </div>
+
+                <WidgetAside
+                  upText="as of today, total of"
+                  center={
+                    data &&
+                    data[data.length - 1] &&
+                    data[data.length - 1].diagnosed
+                  }
+                  downText="diagnosed"
                 />
               </div>
 
-              <WidgetAside
-                upText="as of today, total of"
-                center={
-                  data &&
-                  data[data.length - 1] &&
-                  data[data.length - 1].diagnosed
-                }
-                downText="diagnosed"
-              />
-            </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'stretch',
+                  alignItems: 'center',
+                  marginBottom: 48,
+                  borderBottom: '1px solid #f6f6f6',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ flexBasis: 300 }}>
+                  <WidgetGraph
+                    color={colors.recovered}
+                    data={data}
+                    dataKey="recovered"
+                    width={width}
+                  />
+                </div>
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'stretch',
-                alignItems: 'center',
-                marginBottom: 48,
-                borderBottom: '1px solid #f6f6f6',
-                flexWrap: 'wrap',
-              }}
-            >
-              <div style={{ flexBasis: 300 }}>
-                <WidgetGraph
-                  color={colors.recovered}
-                  data={data}
-                  dataKey="recovered"
-                  width={width}
+                <WidgetAside
+                  upText="total of"
+                  center={
+                    data &&
+                    data[data.length - 1] &&
+                    data[data.length - 1].recovered
+                  }
+                  downText="recovered"
+                />
+                <WidgetAside
+                  upText="with"
+                  center={
+                    data &&
+                    data[data.length - 1] &&
+                    Math.round(
+                      (data[data.length - 1].recovered /
+                        data[data.length - 1].diagnosed) *
+                        100
+                    ) + '%'
+                  }
+                  downText="recovery rate"
                 />
               </div>
 
-              <WidgetAside
-                upText="total of"
-                center={
-                  data &&
-                  data[data.length - 1] &&
-                  data[data.length - 1].recovered
-                }
-                downText="recovered"
-              />
-              <WidgetAside
-                upText="with"
-                center={
-                  data &&
-                  data[data.length - 1] &&
-                  Math.round(
-                    (data[data.length - 1].recovered /
-                      data[data.length - 1].diagnosed) *
-                      100
-                  ) + '%'
-                }
-                downText="recovery rate"
-              />
-            </div>
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'stretch',
+                  alignItems: 'center',
+                  marginBottom: 48,
+                  borderBottom: '1px solid #f6f6f6',
+                  flexWrap: 'wrap',
+                }}
+              >
+                <div style={{ flexBasis: 300 }}>
+                  <WidgetGraph
+                    color={colors.died}
+                    data={data}
+                    dataKey="died"
+                    width={width}
+                  />
+                </div>
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'stretch',
-                alignItems: 'center',
-                marginBottom: 48,
-                borderBottom: '1px solid #f6f6f6',
-                flexWrap: 'wrap',
-              }}
-            >
-              <div style={{ flexBasis: 300 }}>
-                <WidgetGraph
-                  color={colors.died}
-                  data={data}
-                  dataKey="died"
-                  width={width}
+                <WidgetAside
+                  upText="total of"
+                  center={
+                    data && data[data.length - 1] && data[data.length - 1].died
+                  }
+                  downText="died"
+                />
+                <WidgetAside
+                  upText="with"
+                  downText="death rate"
+                  center={
+                    data &&
+                    data[data.length - 1] &&
+                    Math.round(
+                      (data[data.length - 1].died /
+                        data[data.length - 1].diagnosed) *
+                        100
+                    ) + '%'
+                  }
                 />
               </div>
-
-              <WidgetAside
-                upText="total of"
-                center={
-                  data && data[data.length - 1] && data[data.length - 1].died
-                }
-                downText="died"
-              />
-              <WidgetAside
-                upText="with"
-                downText="death rate"
-                center={
-                  data &&
-                  data[data.length - 1] &&
-                  Math.round(
-                    (data[data.length - 1].died /
-                      data[data.length - 1].diagnosed) *
-                      100
-                  ) + '%'
-                }
-              />
-            </div>
-          </Box>
+            </Box>
+          )}
         </div>
       </div>
     );
   }
 }
+
+const TodayNumbers = ({ data, colors }) => (
+  <div>
+    <Subtitle isSize={6} hasTextAlign="centered" style={{ marginBottom: 0 }}>
+      Yesterday:
+    </Subtitle>
+
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'row-reverse',
+        flexWrap: 'wrap',
+        flexBasis: 300,
+        justifyContent: 'center',
+        marginBottom: 12,
+      }}
+    >
+      {data &&
+        data.length > 0 &&
+        Object.keys(colors)
+          .filter((color) => color !== 'unrecovered')
+          .map((type, index) => (
+            <Heading key={type} style={{ paddingRight: 12 }}>
+              <b style={{ fontSize: '150%' }}>
+                {data[data.length - 1] &&
+                  data[data.length - 1][type] - data[data.length - 2][type]}
+              </b>{' '}
+              {type}
+            </Heading>
+          ))}
+    </div>
+  </div>
+);
 
 export default Drawer;
