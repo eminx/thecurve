@@ -283,7 +283,7 @@ class Drawer extends PureComponent {
             },
           ],
         },
-        () => this.setCountriesCompareData()
+        () => setTimeout(() => this.setCountriesCompareData(), 500)
       );
     } else {
       this.setState(
@@ -292,7 +292,7 @@ class Drawer extends PureComponent {
           selectedCountries: [],
           selectedCountry: currentCountry,
         },
-        () => this.setCountryBasedData()
+        () => setTimeout(() => this.setCountryBasedData(), 500)
       );
     }
   };
@@ -365,7 +365,7 @@ class Drawer extends PureComponent {
               />
               {isCompare && (
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <Field style={{ padding: 12 }}>
+                  <Field style={{ paddingTop: 12 }}>
                     <Control>
                       {['diagnosed', 'died', 'recovered'].map((item) => (
                         <Radio
