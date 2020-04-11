@@ -365,7 +365,7 @@ class Drawer extends PureComponent {
               />
               {isCompare && (
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
-                  <Field style={{ paddingTop: 12 }}>
+                  <Field>
                     <Control>
                       {['diagnosed', 'died', 'recovered'].map((item) => (
                         <Radio

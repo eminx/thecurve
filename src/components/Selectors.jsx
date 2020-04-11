@@ -19,7 +19,6 @@ function Selectors({
         justifyContent: 'stretch',
         flexWrap: isMulti ? 'wrap' : 'nowrap',
         paddingBottom: 12,
-        borderBottom: '1px solid #ccc',
       }}
     >
       <Select

@@ -27,7 +27,7 @@ function MainChart({ data, width, colors, isCompare, selectedCountries }) {
           <XAxis dataKey="date" />
           <YAxis />
           <Tooltip contentStyle={{ textAlign: 'left' }} />
-          <Legend verticalAlign="top" align="right" iconType="circle" />
+          <Legend align="right" iconType="circle" />
           {selectedCountries.map((country, index) => (
             <Line
               key={country.label}
@@ -48,7 +48,7 @@ function MainChart({ data, width, colors, isCompare, selectedCountries }) {
         <XAxis dataKey="date" />
         <YAxis />
         <Tooltip contentStyle={{ textAlign: 'left' }} />
-        <Legend verticalAlign="top" align="right" iconType="circle" />
+        <Legend align="right" iconType="circle" />
         <Area
           type="monotone"
           dataKey="diagnosed"
