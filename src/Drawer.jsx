@@ -1,5 +1,7 @@
 import React, { PureComponent } from 'react';
 import { Box, Heading, Title, Subtitle } from 'bloomer';
+import Checkbox from 'rc-checkbox';
+import 'rc-checkbox/assets/index.css';
 
 import {
   MainChart,
@@ -25,12 +27,18 @@ const colors = {
 
 const dates = ['last 30 days', 'last 7 days', 'since 22nd January'];
 
+const populations = require('country-json/src/country-by-population.json');
+console.log(populations.find((item) => item.country === 'Sri Lanka'));
+
 class Drawer extends PureComponent {
   constructor(props) {
     super(props);
     this.state = {
+      allData: null,
       data: [],
       selectedCountry: null,
+      currentCountry: null,
+      selectedCountries: [],
       loading: true,
       countries: allCountries,
       dateIntervals: dates.map((date) => ({ label: date, value: date })),
@@ -40,6 +48,8 @@ class Drawer extends PureComponent {
         document.documentElement.clientWidth ||
         document.body.clientWidth,
       isBlocked: false,
+      error: null,
+      isCompare: false,
     };
   }
 
@@ -72,6 +82,7 @@ class Drawer extends PureComponent {
         this.setState(
           {
             selectedCountry: data.country_name,
+            currentCountry: data.country_name,
           },
           () => this.getData()
         );
@@ -85,11 +96,6 @@ class Drawer extends PureComponent {
   };
 
   getData = () => {
-    const { selectedCountry } = this.state;
-    if (!selectedCountry) {
-      return;
-    }
-
     fetch(apiEndpoint)
       .then((response) => response.json())
       .then((data) => {
@@ -101,20 +107,19 @@ class Drawer extends PureComponent {
           return null;
         }
 
-        const parsedData = {
-          'United States': data['US'],
-          ...data,
-        };
-
         this.setState(
           {
-            allData: parsedData,
+            allData: {
+              'United States': data['US'],
+              ...data,
+            },
           },
           () => this.setCountryBasedData()
         );
       })
       .catch((error) => {
         this.setState({
+          error: error,
           isBlocked: true,
           loading: false,
         });
@@ -165,9 +170,21 @@ class Drawer extends PureComponent {
     }
   };
 
-  handleCountrySelect = (country) => {
-    if (!country || this.state.selectedCountry === country.value) {
+  handleCountrySelect = (country, type) => {
+    console.log(country, type);
+    const { isCompare, selectedCountries } = this.state;
+
+    if (isCompare) {
+      this.setState({
+        selectedCountries: country || [],
+      });
       return;
+    }
+
+    if (!isCompare) {
+      if (!country || this.state.selectedCountry === country.value) {
+        return;
+      }
     }
 
     this.setState(
@@ -187,16 +204,40 @@ class Drawer extends PureComponent {
     );
   };
 
+  toggleCompare = (event, checked) => {
+    const value = event.target.checked;
+
+    if (value) {
+      this.setState(({ selectedCountry }) => ({
+        isCompare: true,
+        selectedCountries: [
+          {
+            value: selectedCountry,
+            label: selectedCountry,
+          },
+        ],
+      }));
+    } else {
+      this.setState(({ currentCountry }) => ({
+        isCompare: false,
+        selectedCountries: [],
+        selectedCountry: currentCountry,
+      }));
+    }
+  };
+
   render() {
     const {
       data,
       countries,
       selectedCountry,
+      selectedCountries,
       dateIntervals,
       selectedDateInterval,
       width,
       isBlocked,
       loading,
+      isCompare,
     } = this.state;
 
     if (!selectedCountry && isBlocked) {
@@ -217,14 +258,31 @@ class Drawer extends PureComponent {
         }}
       >
         <div>
+          <div
+            style={{
+              display: 'flex',
+              justifyContent: 'flex-start',
+              paddingLeft: 24,
+            }}
+          >
+            <label>
+              <Checkbox
+                onChange={(checked) => this.toggleCompare(checked)}
+                checked={isCompare}
+              />{' '}
+              Compare multiple countries
+            </label>
+          </div>
           <Box style={{ marginTop: 12 }}>
             <Selectors
               selectedCountry={selectedCountry}
+              selectedCountries={selectedCountries}
               handleCountrySelect={this.handleCountrySelect}
               countries={countries}
               selectedDateInterval={selectedDateInterval}
               handleIntervalSelect={this.handleIntervalSelect}
               dateIntervals={dateIntervals}
+              isMulti={isCompare}
             />
           </Box>
 
