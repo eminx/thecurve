@@ -128,14 +128,65 @@ class Drawer extends PureComponent {
 
   setCountryBasedData = () => {
     const { allData, selectedCountry } = this.state;
-    const daysCount = this.getDaysCount();
 
     if (!allData) {
       this.getData();
       return;
     }
 
-    const selectedCountryData = allData[selectedCountry]
+    const selectedCountryData = this.parseCountryData(selectedCountry);
+
+    this.setState({
+      data: selectedCountryData,
+      loading: false,
+    });
+  };
+
+  setCountriesCompareData = () => {
+    const { allData, selectedCountries } = this.state;
+
+    if (!allData) {
+      this.getData();
+      return;
+    }
+
+    if (selectedCountries.length === 0) {
+      this.setState({
+        data: [],
+        loading: false,
+      });
+      return;
+    }
+
+    const wholeSet = {};
+    const countries = selectedCountries.map((country) => country.label);
+    selectedCountries.forEach((country) => {
+      const countryData = this.parseCountryData(country.label);
+      wholeSet[country.label] = countryData;
+    });
+
+    const dataSet = [];
+    wholeSet[countries[0]].forEach((dailyData, mainIndex) => {
+      const instance = {
+        date: dailyData.date,
+      };
+      countries.forEach((country) => {
+        instance[country] = wholeSet[country][mainIndex]['diagnosed'];
+      });
+      dataSet.push(instance);
+    });
+
+    this.setState({
+      data: dataSet,
+      loading: false,
+    });
+  };
+
+  parseCountryData = (selectedCountry) => {
+    const { allData } = this.state;
+    const daysCount = this.getDaysCount();
+
+    return allData[selectedCountry]
       .filter((info, index) => {
         if (daysCount === 0) {
           return true;
@@ -149,11 +200,6 @@ class Drawer extends PureComponent {
         died: deaths,
         date: date.substring(5, date.length),
       }));
-
-    this.setState({
-      data: selectedCountryData,
-      loading: false,
-    });
   };
 
   getDaysCount = () => {
@@ -171,13 +217,15 @@ class Drawer extends PureComponent {
   };
 
   handleCountrySelect = (country, type) => {
-    console.log(country, type);
-    const { isCompare, selectedCountries } = this.state;
+    const { isCompare } = this.state;
 
     if (isCompare) {
-      this.setState({
-        selectedCountries: country || [],
-      });
+      this.setState(
+        {
+          selectedCountries: country || [],
+        },
+        () => this.setCountriesCompareData()
+      );
       return;
     }
 
@@ -205,24 +253,31 @@ class Drawer extends PureComponent {
   };
 
   toggleCompare = (event, checked) => {
+    const { selectedCountry, currentCountry } = this.state;
     const value = event.target.checked;
 
     if (value) {
-      this.setState(({ selectedCountry }) => ({
-        isCompare: true,
-        selectedCountries: [
-          {
-            value: selectedCountry,
-            label: selectedCountry,
-          },
-        ],
-      }));
+      this.setState(
+        {
+          isCompare: true,
+          selectedCountries: [
+            {
+              value: selectedCountry,
+              label: selectedCountry,
+            },
+          ],
+        },
+        () => this.setCountriesCompareData()
+      );
     } else {
-      this.setState(({ currentCountry }) => ({
-        isCompare: false,
-        selectedCountries: [],
-        selectedCountry: currentCountry,
-      }));
+      this.setState(
+        {
+          isCompare: false,
+          selectedCountries: [],
+          selectedCountry: currentCountry,
+        },
+        () => this.setCountryBasedData()
+      );
     }
   };
 
@@ -360,7 +415,13 @@ class Drawer extends PureComponent {
             </Title>
 
             {data && data.length > 0 && (
-              <MainChart data={data} colors={colors} width={width} />
+              <MainChart
+                data={data}
+                colors={colors}
+                width={width}
+                isCompare={isCompare}
+                selectedCountries={selectedCountries}
+              />
             )}
           </Box>
 
