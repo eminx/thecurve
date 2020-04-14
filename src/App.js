@@ -16,8 +16,7 @@ function App() {
           <b>the Curve</b>
         </Heading>
         <Subtitle isSize={6} style={{ marginBottom: 0 }}>
-          live data per country: related to Covid-19 diagnosis, recovery and
-          death
+          Covid-19 data per country visualised: diagnosis, recovery and death
           <br />
           updated thrice a day
         </Subtitle>
