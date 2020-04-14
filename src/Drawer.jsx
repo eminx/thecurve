@@ -35,8 +35,18 @@ const colors = {
 
 const dates = ['last 30 days', 'last 7 days', 'since 22nd January'];
 
-// const populations = require('country-json/src/country-by-population.json');
-// console.log(populations.find((item) => item.country === 'Sri Lanka'));
+const populations = require('country-json/src/country-by-population.json');
+
+function getInstanceper1M(country, instance) {
+  const selectedCountry = populations.find(
+    (item) =>
+      item.country.replace(/\s/g, '').toLowerCase() ===
+      country.replace(/\s/g, '').toLowerCase()
+  );
+  const countryPopulation = selectedCountry.population;
+  const instancePer1M = (1000000 * instance) / countryPopulation;
+  return instancePer1M;
+}
 
 class Drawer extends PureComponent {
   constructor(props) {
@@ -59,6 +69,7 @@ class Drawer extends PureComponent {
       error: null,
       isCompare: false,
       selectedCompareType: 'diagnosed',
+      selectedNumberType: 'total numbers',
     };
   }
 
@@ -152,7 +163,12 @@ class Drawer extends PureComponent {
   };
 
   setCountriesCompareData = () => {
-    const { allData, selectedCountries, selectedCompareType } = this.state;
+    const {
+      allData,
+      selectedCountries,
+      selectedCompareType,
+      selectedNumberType,
+    } = this.state;
 
     if (!allData) {
       this.getData();
@@ -179,9 +195,15 @@ class Drawer extends PureComponent {
       const instance = {
         date: dailyData.date,
       };
+
       countries.forEach((country) => {
-        instance[country] = wholeSet[country][mainIndex][selectedCompareType];
-        console.log(instance);
+        const totalNumber = wholeSet[country][mainIndex][selectedCompareType];
+        if (selectedNumberType === 'total numbers') {
+          instance[country] = totalNumber;
+        } else if (selectedNumberType === 'per 1M population') {
+          const instancePer1M = getInstanceper1M(country, totalNumber);
+          instance[country] = Math.round(instancePer1M);
+        }
       });
       dataSet.push(instance);
     });
@@ -303,6 +325,12 @@ class Drawer extends PureComponent {
     );
   };
 
+  setNumberType = (type) => {
+    this.setState({ selectedNumberType: type }, () =>
+      this.setCountriesCompareData()
+    );
+  };
+
   render() {
     const {
       data,
@@ -316,6 +344,7 @@ class Drawer extends PureComponent {
       loading,
       isCompare,
       selectedCompareType,
+      selectedNumberType,
     } = this.state;
 
     if (!selectedCountry && isBlocked) {
@@ -363,8 +392,11 @@ class Drawer extends PureComponent {
                 dateIntervals={dateIntervals}
                 isMulti={isCompare}
               />
+
               {isCompare && (
-                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <div
+                  style={{ display: 'flex', justifyContent: 'space-between' }}
+                >
                   <Field>
                     <Control>
                       {['diagnosed', 'died', 'recovered'].map((item) => (
@@ -373,6 +405,22 @@ class Drawer extends PureComponent {
                           defaultChecked={item === selectedCompareType}
                           checked={item === selectedCompareType}
                           onChange={() => this.setCompareType(item)}
+                        >
+                          {' '}
+                          {item}
+                        </Radio>
+                      ))}
+                    </Control>
+                  </Field>
+
+                  <Field>
+                    <Control>
+                      {['total numbers', 'per 1M population'].map((item) => (
+                        <Radio
+                          key={item}
+                          defaultChecked={item === selectedNumberType}
+                          checked={item === selectedNumberType}
+                          onChange={() => this.setNumberType(item)}
                         >
                           {' '}
                           {item}
